@@ -14,6 +14,7 @@ use templatehoshii::add::add;
 use templatehoshii::config::{Config, EnvConfig, StaticConfig};
 use templatehoshii::dump::dump;
 use templatehoshii::repository::{get_template, list_templates};
+use templatehoshii::rm::rm;
 
 fn cli(config: &impl Config, args: Vec<String>) -> i32 {
     let matches = App::new("templatehoshii")
@@ -50,15 +51,28 @@ fn cli(config: &impl Config, args: Vec<String>) -> i32 {
                         .help("template content"),
                 ),
         )
+        .subcommand(
+            SubCommand::with_name("rm").about("remove template").arg(
+                Arg::with_name("name")
+                    .required(true)
+                    .help("template name to remove"),
+            ),
+        )
         .get_matches_from(args);
 
-    // subサブコマンドの解析結果を取得
     if let Some(matches) = matches.subcommand_matches("add") {
         let template_name = matches.value_of("name").unwrap().to_string();
         let content_path = matches.value_of("source").unwrap();
         let content_path = PathBuf::from(content_path);
 
         add(config, template_name, content_path);
+
+        return 0;
+    }
+    if let Some(matches) = matches.subcommand_matches("rm") {
+        let template_name = matches.value_of("name").unwrap().to_string();
+
+        rm(config, template_name);
 
         return 0;
     }
