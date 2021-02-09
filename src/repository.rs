@@ -1,8 +1,9 @@
 use std::env;
 use std::fs;
 use std::option::Option;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 
+use crate::config::{Config, EnvConfig, StaticConfig};
 use crate::data::Template;
 
 fn is_single_file_teplate(template_path: &PathBuf) -> bool {
@@ -39,9 +40,8 @@ fn _list_templates(templates_dir: &PathBuf) -> Vec<Template> {
     templates
 }
 
-pub fn list_templates() -> Vec<Template> {
-    let home = env::home_dir().unwrap();
-    let templates_dir = home.join(".templatehoshii/templates");
+pub fn list_templates(config: &impl Config) -> Vec<Template> {
+    let templates_dir = PathBuf::from(&config.get_templates_dir());
     _list_templates(&templates_dir)
 }
 
@@ -50,9 +50,8 @@ pub fn _get_template(templates_dir: &PathBuf, template_name: String) -> Option<T
     templates.into_iter().find(|e| e.name == template_name)
 }
 
-pub fn get_template(template_name: String) -> Option<Template> {
-    let home = env::home_dir().unwrap();
-    let templates_dir = home.join(".templatehoshii/templates");
+pub fn get_template(config: &impl Config, template_name: String) -> Option<Template> {
+    let templates_dir = PathBuf::from(&config.get_templates_dir());
     _get_template(&templates_dir, template_name)
 }
 
