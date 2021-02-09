@@ -105,18 +105,18 @@ fn cli(config: &impl Config, args: Vec<String>) -> i32 {
         let current_dir = env::current_dir().unwrap();
         let template = get_template(config, template_name);
         if let Some(template) = template {
-            if !to_file {
-                if !template.is_single_file {
-                    println!("not --to-file but this template is not is_single_file");
-                    return 1;
+            if template.is_single_file {
+                if to_file {
+                    dump(&template, current_dir);
+                } else {
+                    // dump to stdio
+                    let contents =
+                        std::fs::read_to_string(template.content_file_path_if_sft().unwrap())
+                            .unwrap();
+                    println!("{}", contents);
                 }
-                // dump to stdio
-                let contents =
-                    std::fs::read_to_string(template.content_file_path_if_sft().unwrap()).unwrap();
-                println!("{}", contents);
                 return 0;
             }
-
             dump(&template, current_dir);
             return 0;
         } else {
