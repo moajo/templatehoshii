@@ -1,5 +1,6 @@
 use std::env;
 use std::fs;
+use std::option::Option;
 use std::path::PathBuf;
 
 use crate::data::Template;
@@ -31,7 +32,7 @@ fn load_template(template_path: PathBuf) -> Template {
     }
 }
 
-fn _list_templates(templates_dir: PathBuf) -> Vec<Template> {
+fn _list_templates(templates_dir: &PathBuf) -> Vec<Template> {
     let paths = fs::read_dir(templates_dir).unwrap();
     let mut templates: Vec<Template> = paths.map(|e| load_template(e.unwrap().path())).collect();
     templates.sort_by(|a, b| a.name.cmp(&b.name));
@@ -41,7 +42,18 @@ fn _list_templates(templates_dir: PathBuf) -> Vec<Template> {
 pub fn list_templates() -> Vec<Template> {
     let home = env::home_dir().unwrap();
     let templates_dir = home.join(".templatehoshii/templates");
-    _list_templates(templates_dir)
+    _list_templates(&templates_dir)
+}
+
+pub fn _get_templates(templates_dir: &PathBuf, template_name: String) -> Option<Template> {
+    let templates = _list_templates(templates_dir);
+    templates.into_iter().find(|e| e.name == template_name)
+}
+
+pub fn get_templates(template_name: String) -> Option<Template> {
+    let home = env::home_dir().unwrap();
+    let templates_dir = home.join(".templatehoshii/templates");
+    _get_templates(&templates_dir, template_name)
 }
 
 #[cfg(test)]
@@ -49,12 +61,12 @@ mod tests {
 
     use std::env;
 
-    use crate::repository::{Template, _list_templates};
+    use crate::repository::{Template, _get_templates, _list_templates};
 
     #[test]
-    fn it_works() {
-        let current = env::current_dir().unwrap().join("test");
-        let templates = _list_templates(current);
+    fn test_list_templates() {
+        let test_dir = env::current_dir().unwrap().join("test");
+        let templates = _list_templates(&test_dir);
         assert_eq!(templates.len(), 3);
         assert_eq!(
             templates[0],
@@ -94,6 +106,25 @@ mod tests {
                     .unwrap(),
                 is_single_file: false
             }
+        );
+    }
+
+    #[test]
+    fn test_get_template() {
+        let test_dir = env::current_dir().unwrap().join("test");
+        assert_eq!(_get_templates(&test_dir, "notfound".to_string()), None);
+        assert_eq!(
+            _get_templates(&test_dir, "template1".to_string()),
+            Some(Template {
+                name: "template1".to_string(),
+                path: env::current_dir()
+                    .unwrap()
+                    .join("test/template1")
+                    .into_os_string()
+                    .into_string()
+                    .unwrap(),
+                is_single_file: true
+            })
         );
     }
 }
