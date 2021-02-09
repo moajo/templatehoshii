@@ -85,7 +85,16 @@ fn cli(config: &impl Config, args: Vec<String>) -> i32 {
             None => {
                 info!("[mode] interactive");
                 let templates = list_templates(config);
-                let availables: Vec<_> = templates.iter().map(|a| a.name.to_string()).collect();
+                let availables: Vec<_> = templates
+                    .iter()
+                    .map(|a| {
+                        if a.is_single_file {
+                            format!("*{}", a.name.to_string())
+                        } else {
+                            a.name.to_string()
+                        }
+                    })
+                    .collect();
                 debug!("availables: {:?}", availables);
                 if availables.is_empty() {
                     println!("No template is available ");

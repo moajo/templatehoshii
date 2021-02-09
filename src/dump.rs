@@ -1,12 +1,18 @@
 use crate::data::Template;
+use log::{debug, info, trace};
+use std::env;
 use std::fs;
 use std::path::{Path, PathBuf};
 
 fn write_file(template_path: &Path, dist_dir: &PathBuf) {
-    println!("{:?} => {:?}", template_path, dist_dir);
+    let current = env::current_dir().unwrap();
     let fname = template_path.file_name().unwrap();
+    let dst_path = dist_dir.join(fname);
+    let relative_path = dst_path.strip_prefix(current).unwrap();
+    info!("{:?} => {:?}", relative_path, dst_path);
+    println!("👉 {}", dst_path.to_string_lossy());
     fs::create_dir_all(dist_dir).unwrap();
-    fs::copy(template_path, dist_dir.join(fname)).unwrap();
+    fs::copy(template_path, dst_path).unwrap();
 }
 
 fn _dump(template_path: &Path, dist_dir: &PathBuf) {
