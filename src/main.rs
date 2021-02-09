@@ -88,7 +88,9 @@ fn cli(config: &impl Config, args: Vec<String>) -> i32 {
             None => {
                 info!("[mode] interactive");
                 let templates = list_templates(config);
-                let availables: Vec<_> = templates
+                let available_template_names: Vec<_> =
+                    templates.iter().map(|a| a.name.to_string()).collect();
+                let select_items: Vec<_> = templates
                     .iter()
                     .map(|a| {
                         if a.is_single_file {
@@ -98,18 +100,18 @@ fn cli(config: &impl Config, args: Vec<String>) -> i32 {
                         }
                     })
                     .collect();
-                debug!("availables: {:?}", availables);
-                if availables.is_empty() {
+                debug!("availables: {:?}", select_items);
+                if select_items.is_empty() {
                     println!("No template is available ");
                     return 0;
                 }
                 let selection = Select::with_theme(&ColorfulTheme::default())
                     .with_prompt("Select template to dump?")
                     .default(0)
-                    .items(&availables)
+                    .items(&select_items)
                     .interact()
                     .unwrap();
-                let selected = &availables[selection];
+                let selected = &available_template_names[selection];
                 selected.to_string()
             }
             Some(template_name) => template_name,
