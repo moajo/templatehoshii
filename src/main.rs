@@ -1,6 +1,6 @@
 // use chrono::{Local, NaiveDate};
 use clap::{crate_authors, crate_version, App, Arg, SubCommand};
-// use dialoguer::{theme::ColorfulTheme, Select};
+use dialoguer::{theme::ColorfulTheme, Select};
 // use healthcare::{get_available_times, load_config, reserve};
 use env_logger;
 use log::{debug, info, trace};
@@ -81,32 +81,47 @@ fn cli(config: &impl Config, args: Vec<String>) -> i32 {
 
     if let Some(matches) = matches.subcommand_matches("dump") {
         let to_file = matches.is_present("to_file");
-        if let Some(template_name) = matches.value_of("template") {
-            let current_dir = env::current_dir().unwrap();
-            let template = get_template(config, template_name.to_string());
-            if let Some(template) = template {
-                if !to_file {
-                    if !template.is_single_file {
-                        println!("not --to-file but this template is not is_single_file");
-                        return 1;
-                    }
-                    // dump to stdio
-                    let contents =
-                        std::fs::read_to_string(template.content_file_path_if_sft().unwrap())
-                            .unwrap();
-                    println!("{}", contents);
+        let template_name = match matches.value_of("template").map(|s| s.to_string()) {
+            None => {
+                info!("[mode] interactive");
+                let templates = list_templates(config);
+                let availables: Vec<_> = templates.iter().map(|a| a.name.to_string()).collect();
+                debug!("availables: {:?}", availables);
+                if availables.is_empty() {
+                    println!("No template is available ");
                     return 0;
                 }
-
-                dump(&template, current_dir);
-                return 0;
-            } else {
-                println!("template not found!");
-                return 1;
+                let selection = Select::with_theme(&ColorfulTheme::default())
+                    .with_prompt("Select template to dump?")
+                    .default(0)
+                    .items(&availables)
+                    .interact()
+                    .unwrap();
+                let selected = &availables[selection];
+                selected.to_string()
             }
-        } else {
-            println!("TODO: select templates interactively and dump it!");
+            Some(template_name) => template_name,
+        };
+        let current_dir = env::current_dir().unwrap();
+        let template = get_template(config, template_name);
+        if let Some(template) = template {
+            if !to_file {
+                if !template.is_single_file {
+                    println!("not --to-file but this template is not is_single_file");
+                    return 1;
+                }
+                // dump to stdio
+                let contents =
+                    std::fs::read_to_string(template.content_file_path_if_sft().unwrap()).unwrap();
+                println!("{}", contents);
+                return 0;
+            }
+
+            dump(&template, current_dir);
             return 0;
+        } else {
+            println!("template not found!");
+            return 1;
         }
     }
 
