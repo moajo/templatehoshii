@@ -46,8 +46,8 @@ fn cli(config: &impl Config, args: Vec<String>) -> i32 {
         return 0;
     }
 
-    if let Some(ref matches) = matches.subcommand_matches("dump") {
-        let to_file = matches.value_of("to_file") != None;
+    if let Some(matches) = matches.subcommand_matches("dump") {
+        let to_file = matches.is_present("to_file");
         if let Some(template_name) = matches.value_of("template") {
             let current_dir = env::current_dir().unwrap();
             let template = get_template(config, template_name.to_string());
