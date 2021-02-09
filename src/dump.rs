@@ -9,8 +9,8 @@ fn write_file(template_path: &Path, dist_dir: &PathBuf) {
     let fname = template_path.file_name().unwrap();
     let dst_path = dist_dir.join(fname);
     let relative_path = dst_path.strip_prefix(current).unwrap();
-    info!("{:?} => {:?}", relative_path, dst_path);
-    println!("👉 {}", dst_path.to_string_lossy());
+    info!("{:?} => {:?}", template_path, dst_path);
+    println!("👉 {}", relative_path.to_string_lossy());
     fs::create_dir_all(dist_dir).unwrap();
     fs::copy(template_path, dst_path).unwrap();
 }
