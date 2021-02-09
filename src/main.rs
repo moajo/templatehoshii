@@ -22,14 +22,14 @@ fn cli(config: &impl Config, args: Vec<String>) -> i32 {
         .author(crate_authors!())
         .subcommand(
             SubCommand::with_name("dump")
-                .about("sample subcommand") // このサブコマンドについて
+                .about("dump template to stdout or file")
                 .arg(
-                    Arg::with_name("template") // フラグを定義
-                        .help("sample flag by sub"), // ヘルプメッセージ
+                    Arg::with_name("template")
+                        .help("[optional] name of template to dump"),
                 )
                 .arg(
                     Arg::with_name("to_file")
-                        .help("dump to file using default filename.")
+                        .help("dump to file using default filename")
                         .short("f")
                         .long("to-file"),
                 ),
@@ -50,7 +50,7 @@ fn cli(config: &impl Config, args: Vec<String>) -> i32 {
                 .arg(
                     Arg::with_name("source")
                         .required(true)
-                        .help("template content"),
+                        .help("template content. file or directory"),
                 ),
         )
         .subcommand(
@@ -61,6 +61,9 @@ fn cli(config: &impl Config, args: Vec<String>) -> i32 {
             ),
         )
         .get_matches_from(args);
+
+    let template_dir = config.get_templates_dir();
+    std::fs::create_dir_all(template_dir).unwrap();
 
     if let Some(matches) = matches.subcommand_matches("add") {
         let template_name = matches.value_of("name").unwrap().to_string();
