@@ -37,7 +37,7 @@ fn cli(config: &impl Config, args: Vec<String>) -> i32 {
         .subcommand(
             SubCommand::with_name("list")
                 .alias("ls")
-                .about("list all templates"),
+                .about("list all templates. * means template has only 1 file, and it dumps to stdout as default."),
         )
         .subcommand(
             SubCommand::with_name("add")
@@ -128,7 +128,11 @@ fn cli(config: &impl Config, args: Vec<String>) -> i32 {
     if let Some(_) = matches.subcommand_matches("list") {
         let templates = list_templates(config);
         for a in templates.iter() {
-            println!("{:?}", a);
+            if a.is_single_file {
+                println!("*{}", a.name);
+            } else {
+                println!("{}", a.name);
+            }
         }
         return 0;
     }
