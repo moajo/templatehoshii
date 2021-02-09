@@ -18,6 +18,12 @@ SUBCOMMANDS:
     rm      remove template
 ```
 
+# installation
+
+```sh
+cargo install --git https://github.com/moajo/templatehoshii
+```
+
 # usage
 
 ### simple dump
