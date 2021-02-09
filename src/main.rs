@@ -35,7 +35,9 @@ fn cli(config: &impl Config, args: Vec<String>) -> i32 {
                 ),
         )
         .subcommand(
-            SubCommand::with_name("list"), // .about("sample subcommand") // このサブコマンドについて
+            SubCommand::with_name("list")
+                .alias("ls")
+                .about("list all templates"),
         )
         .subcommand(
             SubCommand::with_name("add")
