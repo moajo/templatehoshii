@@ -45,15 +45,15 @@ pub fn list_templates() -> Vec<Template> {
     _list_templates(&templates_dir)
 }
 
-pub fn _get_templates(templates_dir: &PathBuf, template_name: String) -> Option<Template> {
+pub fn _get_template(templates_dir: &PathBuf, template_name: String) -> Option<Template> {
     let templates = _list_templates(templates_dir);
     templates.into_iter().find(|e| e.name == template_name)
 }
 
-pub fn get_templates(template_name: String) -> Option<Template> {
+pub fn get_template(template_name: String) -> Option<Template> {
     let home = env::home_dir().unwrap();
     let templates_dir = home.join(".templatehoshii/templates");
-    _get_templates(&templates_dir, template_name)
+    _get_template(&templates_dir, template_name)
 }
 
 #[cfg(test)]
@@ -61,7 +61,7 @@ mod tests {
 
     use std::env;
 
-    use crate::repository::{Template, _get_templates, _list_templates};
+    use crate::repository::{Template, _get_template, _list_templates};
 
     #[test]
     fn test_list_templates() {
@@ -112,9 +112,9 @@ mod tests {
     #[test]
     fn test_get_template() {
         let test_dir = env::current_dir().unwrap().join("test");
-        assert_eq!(_get_templates(&test_dir, "notfound".to_string()), None);
+        assert_eq!(_get_template(&test_dir, "notfound".to_string()), None);
         assert_eq!(
-            _get_templates(&test_dir, "template1".to_string()),
+            _get_template(&test_dir, "template1".to_string()),
             Some(Template {
                 name: "template1".to_string(),
                 path: env::current_dir()

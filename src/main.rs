@@ -9,7 +9,8 @@ use std::env;
 use tokio::io::{AsyncReadExt, AsyncWriteExt};
 use tokio::net::TcpListener;
 
-use templatehoshii::repository::list_templates;
+use templatehoshii::dump::dump;
+use templatehoshii::repository::{get_template, list_templates};
 
 #[tokio::main]
 async fn main() {
@@ -24,6 +25,12 @@ async fn main() {
                 .arg(
                     Arg::with_name("template") // フラグを定義
                         .help("sample flag by sub"), // ヘルプメッセージ
+                )
+                .arg(
+                    Arg::with_name("to_file")
+                        .help("dump to file using default filename.")
+                        .short("f")
+                        .long("to-file"),
                 ),
         )
         .subcommand(
@@ -42,9 +49,29 @@ async fn main() {
     }
 
     if let Some(ref matches) = matches.subcommand_matches("dump") {
-        println!("dump!!!"); // subが指定されていればメッセージを表示
-                             // subflgのON/OFFで表示するメッセージを切り替え
-                             // println!("subflg is {}", if matches.is_present("subflg") {"ON"} else {"OFF"});
+        let to_file = matches.value_of("to_file") != None;
+        if let Some(template_name) = matches.value_of("template") {
+            let current_dir = env::current_dir().unwrap();
+            let template = get_template(template_name.to_string());
+            if let Some(template) = template {
+                if !to_file {
+                    if !template.is_single_file {
+                        panic!("not --to-file but this template is not is_single_file")
+                    }
+                    // dump to stdio
+                    let contents =
+                        std::fs::read_to_string(template.content_file_path_if_sft().unwrap())
+                            .unwrap();
+                    println!("{}", contents)
+                }
+
+                dump(&template, current_dir);
+            } else {
+                println!("template not found!")
+            }
+        } else {
+            println!("TODO: select templates interactively and dump it!");
+        }
     }
 
     if let Some(_) = matches.subcommand_matches("list") {
