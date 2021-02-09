@@ -6,9 +6,11 @@ use env_logger;
 use log::{debug, info, trace};
 use std::env;
 
+use std::path::{Path, PathBuf};
 use tokio::io::{AsyncReadExt, AsyncWriteExt};
 use tokio::net::TcpListener;
 
+use templatehoshii::add::add;
 use templatehoshii::config::{Config, EnvConfig, StaticConfig};
 use templatehoshii::dump::dump;
 use templatehoshii::repository::{get_template, list_templates};
@@ -35,13 +37,28 @@ fn cli(config: &impl Config, args: Vec<String>) -> i32 {
             SubCommand::with_name("list"), // .about("sample subcommand") // このサブコマンドについて
         )
         .subcommand(
-            SubCommand::with_name("add"), // .about("sample subcommand") // このサブコマンドについて
+            SubCommand::with_name("add")
+                .about("add new template")
+                .arg(
+                    Arg::with_name("name")
+                        .required(true)
+                        .help("new template name"),
+                )
+                .arg(
+                    Arg::with_name("source")
+                        .required(true)
+                        .help("template content"),
+                ),
         )
         .get_matches_from(args);
 
     // subサブコマンドの解析結果を取得
-    if let Some(ref matches) = matches.subcommand_matches("add") {
-        println!("add!!!");
+    if let Some(matches) = matches.subcommand_matches("add") {
+        let template_name = matches.value_of("name").unwrap().to_string();
+        let content_path = matches.value_of("source").unwrap();
+        let content_path = PathBuf::from(content_path);
+
+        add(config, template_name, content_path);
 
         return 0;
     }
