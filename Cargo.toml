@@ -1,0 +1,21 @@
+[package]
+authors = ["moajo <mimirosiasd@gmail.com>"]
+edition = "2018"
+name = "templatehoshii"
+version = "0.1.0"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[lib]
+name = "templatehoshii"
+path = "src/lib.rs"
+
+[[bin]]
+name = "templatehoshii"
+path = "src/main.rs"
+
+[dependencies]
+clap = "2.33.3"
+env_logger = "0.8.2"
+log = "0.4.14"
+tokio = {version = "1.2.0", features = ["full"]}
