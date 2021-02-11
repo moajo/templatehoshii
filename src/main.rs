@@ -6,6 +6,7 @@ use env_logger;
 use log::{debug, info, trace};
 use std::env;
 
+use std::option::Option;
 use std::path::{Path, PathBuf};
 use tokio::io::{AsyncReadExt, AsyncWriteExt};
 use tokio::net::TcpListener;
@@ -16,13 +17,42 @@ use templatehoshii::dump::dump;
 use templatehoshii::repository::{get_template, list_templates};
 use templatehoshii::rm::rm;
 
+fn select_template_interactively(config: &impl Config) -> Option<String> {
+    info!("[mode] interactive");
+    let templates = list_templates(config);
+    let available_template_names: Vec<_> = templates.iter().map(|a| a.name.to_string()).collect();
+    let select_items: Vec<_> = templates
+        .iter()
+        .map(|a| {
+            if a.is_single_file {
+                format!("*{}", a.name.to_string())
+            } else {
+                a.name.to_string()
+            }
+        })
+        .collect();
+    debug!("availables: {:?}", select_items);
+    if select_items.is_empty() {
+        println!("No template is available ");
+        return None;
+    }
+    let selection = Select::with_theme(&ColorfulTheme::default())
+        .with_prompt("Select template to dump?")
+        .default(0)
+        .items(&select_items)
+        .interact()
+        .unwrap();
+    let selected = &available_template_names[selection];
+    Some(selected.to_string())
+}
+
 fn cli(config: &impl Config, args: Vec<String>) -> i32 {
     let matches = App::new("templatehoshii")
         .version(crate_version!())
         .author(crate_authors!())
         .subcommand(
             SubCommand::with_name("dump")
-                .about("dump template to stdout or file")
+                .about("[default] dump template to stdout or file")
                 .arg(
                     Arg::with_name("template")
                         .help("[optional] name of template to dump"),
@@ -81,38 +111,26 @@ fn cli(config: &impl Config, args: Vec<String>) -> i32 {
 
         return 0;
     }
-
+    if let Some(_) = matches.subcommand_matches("list") {
+        let templates = list_templates(config);
+        for a in templates.iter() {
+            if a.is_single_file {
+                println!("*{}", a.name);
+            } else {
+                println!("{}", a.name);
+            }
+        }
+        return 0;
+    }
     if let Some(matches) = matches.subcommand_matches("dump") {
         let to_file = matches.is_present("to_file");
         let template_name = match matches.value_of("template").map(|s| s.to_string()) {
             None => {
-                info!("[mode] interactive");
-                let templates = list_templates(config);
-                let available_template_names: Vec<_> =
-                    templates.iter().map(|a| a.name.to_string()).collect();
-                let select_items: Vec<_> = templates
-                    .iter()
-                    .map(|a| {
-                        if a.is_single_file {
-                            format!("*{}", a.name.to_string())
-                        } else {
-                            a.name.to_string()
-                        }
-                    })
-                    .collect();
-                debug!("availables: {:?}", select_items);
-                if select_items.is_empty() {
-                    println!("No template is available ");
+                let selected = select_template_interactively(config);
+                if selected == None {
                     return 0;
                 }
-                let selection = Select::with_theme(&ColorfulTheme::default())
-                    .with_prompt("Select template to dump?")
-                    .default(0)
-                    .items(&select_items)
-                    .interact()
-                    .unwrap();
-                let selected = &available_template_names[selection];
-                selected.to_string()
+                selected.unwrap()
             }
             Some(template_name) => template_name,
         };
@@ -138,19 +156,29 @@ fn cli(config: &impl Config, args: Vec<String>) -> i32 {
             return 1;
         }
     }
-
-    if let Some(_) = matches.subcommand_matches("list") {
-        let templates = list_templates(config);
-        for a in templates.iter() {
-            if a.is_single_file {
-                println!("*{}", a.name);
-            } else {
-                println!("{}", a.name);
-            }
+    let template_name = {
+        let selected = select_template_interactively(config);
+        if selected == None {
+            return 0;
         }
+        selected.unwrap()
+    };
+    let current_dir = env::current_dir().unwrap();
+    let template = get_template(config, template_name);
+    if let Some(template) = template {
+        if template.is_single_file {
+            // dump to stdio
+            let contents =
+                std::fs::read_to_string(template.content_file_path_if_sft().unwrap()).unwrap();
+            println!("{}", contents);
+            return 0;
+        }
+        dump(&template, current_dir);
         return 0;
+    } else {
+        println!("template not found!");
+        return 1;
     }
-    return 1;
 }
 
 #[tokio::main]
