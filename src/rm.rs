@@ -1,8 +1,6 @@
-use crate::config::{Config, EnvConfig, StaticConfig};
-use crate::data::Template;
+use crate::config::Config;
 use rm_rf;
-use std::fs;
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 
 pub fn rm(config: &impl Config, template_name: String) {
     let templates_dir = config.get_templates_dir();

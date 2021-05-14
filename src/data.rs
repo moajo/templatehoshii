@@ -1,5 +1,5 @@
 use std::option::Option;
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 
 #[derive(Debug, PartialEq, Eq)]
 pub struct Template {

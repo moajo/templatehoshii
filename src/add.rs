@@ -1,8 +1,7 @@
-use crate::config::{Config, EnvConfig, StaticConfig};
-use crate::data::Template;
-use log::{debug, info, trace};
+use crate::config::Config;
+use log::info;
 use std::fs;
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 
 fn write_file(template_path: &PathBuf, dist_dir: &PathBuf) {
     info!("{:?} => {:?}", template_path, dist_dir);

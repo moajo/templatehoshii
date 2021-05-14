@@ -1,21 +1,22 @@
 ```sh
 ❯ templatehoshii --help
-templatehoshii 0.1.0
+templatehoshii 0.2.0
 moajo <mimirosiasd@gmail.com>
 
 USAGE:
-    templatehoshii [SUBCOMMAND]
+    templatehoshii [FLAGS] [OPTIONS] [template]
 
 FLAGS:
     -h, --help       Prints help information
+    -l, --list       list all templates. * means template has only 1 file, and it dumps to stdout as default.
+        --rm         template name to remove
     -V, --version    Prints version information
 
-SUBCOMMANDS:
-    add     add new template
-    dump    dump template to stdout or file
-    help    Prints this message or the help of the given subcommand(s)
-    list    list all templates. * means template has only 1 file, and it dumps to stdout as default.
-    rm      remove template
+OPTIONS:
+    -a, --add <add>    new template name to add
+
+ARGS:
+    <template>    target template name
 ```
 
 # installation
@@ -34,39 +35,30 @@ cargo install --git https://github.com/moajo/templatehoshii
 hello:
         echo "this is Makefile template"
 
-❯ templatehoshii add make Makefile
+❯ templatehoshii --add make Makefile
 👈  Makefile
 
-❯ templatehoshii ls
+❯ templatehoshii --list
 *make
 
-❯ templatehoshii dump make
-.PHONY: hello
-hello:
-        echo "this is Makefile template"
+❯ templatehoshii spec
+👉 Makefile
 
 ❯ templatehoshii rm make
 Template 'make' is removed.
 ```
 
-### dump as file
-
-```sh
-# same as "templatehoshii dump make > Makefile"
-❯ templatehoshii dump make -f
-```
-
 ### select item interactively
 
 ```sh
-❯ templatehoshii add hoge Makefile
+❯ templatehoshii --add hoge Makefile
 👈  Makefile
-❯ templatehoshii add hoge2 Makefile
+❯ templatehoshii --add hoge2 Makefile
 👈  Makefile
-❯ templatehoshii add hoge3 Makefile
+❯ templatehoshii --add hoge3 Makefile
 👈  Makefile
 
-bash-3.2$ templatehoshii dump
+❯ templatehoshii
 ? Select template to dump? ›
 ❯ *hoge
   *hoge2
@@ -79,13 +71,11 @@ bash-3.2$ templatehoshii dump
 ❯ ls docker
 Dockerfile       requirements.txt
 
-❯ templatehoshii add docker docker
+❯ templatehoshii --add docker docker
 👈  docker/requirements.txt
 👈  docker/Dockerfile
 
-❯ templatehoshii dump docker
+❯ templatehoshii docker
 👉 docker/requirements.txt
 👉 docker/Dockerfile
 ```
-
-> NOTE: directory template will dump to directory has same name. (not stdout)

@@ -1,5 +1,5 @@
 use crate::data::Template;
-use log::{debug, info, trace};
+use log::info;
 use std::env;
 use std::fs;
 use std::path::{Path, PathBuf};

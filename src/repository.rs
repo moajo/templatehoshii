@@ -1,9 +1,8 @@
-use std::env;
 use std::fs;
 use std::option::Option;
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 
-use crate::config::{Config, EnvConfig, StaticConfig};
+use crate::config::Config;
 use crate::data::Template;
 
 fn is_single_file_teplate(template_path: &PathBuf) -> bool {

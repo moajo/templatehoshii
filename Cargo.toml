@@ -2,7 +2,7 @@
 authors = ["moajo <mimirosiasd@gmail.com>"]
 edition = "2018"
 name = "templatehoshii"
-version = "0.1.0"
+version = "0.2.0"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
@@ -16,8 +16,11 @@ path = "src/main.rs"
 
 [dependencies]
 clap = "2.33.3"
+dialoguer = "0.8.0"
+dirs = "3.0.2"
 env_logger = "0.8.2"
 log = "0.4.14"
-tokio = {version = "1.2.0", features = ["full"]}
 rm_rf = "0.6.1"
-dialoguer = "0.7.1"
+tempdir = "0.3.7"
+test-case = "1.1.0"
+tokio = {version = "1.2.0", features = ["full"]}
